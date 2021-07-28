@@ -7,7 +7,7 @@ terraform {
     }
   }
 }
-provider "azure" {
+provider "azurerm" {
   features {}
   subscription_id = "6b806999-887d-4690-9e0b-dcb8b0504009"
   client_id       = "9e47a648-bc41-4c9e-b218-8f11d46b06ac"
