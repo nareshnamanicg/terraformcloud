@@ -16,9 +16,3 @@ provider "azurerm" {
   client_secret   = "777567a3-d96a-48a2-8e56-9cf9005790be"
   tenant_id       = "46e62401-e0cb-44e7-b9bf-90bf637a3628"
 }
-
-# Create a resource group if it doesn't exist
-resource "azurerm_resource_group" "tfdemo" {
-  name     = "tfdemo-resources"
-  location = "West Europe"
-}
