@@ -158,11 +158,3 @@ resource "azurerm_virtual_machine_data_disk_attachment" "adattach-01" {
   caching            = "ReadWrite"
   lun                = 0
 }
-
-# Attaching managed disk 2 to virtual machine
-resource "azurerm_virtual_machine_data_disk_attachment" "adattach-02" {
-  managed_disk_id    = azurerm_managed_disk.amd-02.id
-  virtual_machine_id = azurerm_linux_virtual_machine.avm-ssh-01.id
-  caching            = "ReadWrite"
-  lun                = 1
-}
