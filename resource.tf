@@ -21,8 +21,3 @@ resource "azurerm_resource_group" "tfdemo" {
   name     = "tfdemo-resources"
   location = "West Europe"
 }
-
-    tags = {
-        environment = "Terraform Demo"
-    }
-}
