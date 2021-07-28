@@ -126,11 +126,11 @@ resource "azurerm_linux_virtual_machine" "avm-ssh-01" {
 #      username   = admin_ssh_key.value["username"]
 #      public_key = admin_ssh_key.value["public_key"]
 #    }
-  }
-  tags = {
-    Tag1 = "ManagedVM"
-  }
-}
+#  }
+#  tags = {
+#    Tag1 = "ManagedVM"
+#  }
+#}
 
 # Managed disk
 resource "azurerm_managed_disk" "amd-01" {
