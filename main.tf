@@ -14,6 +14,10 @@ locals {
   vmSize                   = "Standard_A2"
   virtualNetworkName       = join("", [var.vmName, "vnet"])
   networkSecurityGroupName = "default-NSG"
+  ssh_key = {
+    username   = var.adminUsername
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
 
 }
 
