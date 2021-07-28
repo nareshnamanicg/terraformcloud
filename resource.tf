@@ -83,3 +83,16 @@ resource "azurerm_template_deployment" "example" {
   }
 }
 DEPLOY
+
+
+  # these key-value pairs are passed into the ARM Template's `parameters` block
+  parameters = {
+    "storageAccountType" = "Standard_GRS"
+  }
+
+  deployment_mode = "Incremental"
+}
+
+output "storageAccountName" {
+  value = azurerm_template_deployment.example.outputs["storageAccountName"]
+}
