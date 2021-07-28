@@ -1,160 +1,167 @@
 # Defining the local variables
 locals {
-  dataDisk1Name            = join("", [random_string.disk1.result, var.vmName, "datadisk1"])
-  dataDisk2Name            = join("", [random_string.disk2.result, var.vmName, "datadisk2"])
-  imagePublisher           = "RedHat"
-  imageOffer               = "RHEL"
-  imageSku                 = "7.2"
-  nicName                  = join("", [var.vmName, "nic"])
-  addressPrefix            = "10.0.0.0/16"
-  subnetName               = "Subnet"
-  subnetPrefix             = "10.0.0.0/24"
-  publicIPAddressName      = join("", [var.vmName, "publicip"])
-  publicIPAddressType      = "Dynamic"
-  vmSize                   = "Standard_A2"
-  virtualNetworkName       = join("", [var.vmName, "vnet"])
-  networkSecurityGroupName = "default-NSG"
-
-#  ssh_key = {
-#    username   = var.adminUsername
-#    public_key = file("~/.ssh/id_rsa.pub")
-#  }
-}
-
-# Generate random string for datadisk1
-resource "random_string" "disk1" {
-  length  = 8
-  special = "false"
-}
-
-# Generate random string for datadisk2
-resource "random_string" "disk2" {
-  length  = 8
-  special = "false"
+  virtualMachineName        = "VM-MultiNic"
+  nicName                   = ["nic-1", "nic-2"]
+  nicConfigName             = "ipconfig1"
+  virtualNetworkName        = "virtualNetwork"
+  addressSpace              = ["10.0.0.0/16"]
+  subnets                   = ["subnet-1", "subnet-2"]
+  subnetPrefix              = ["10.0.0.0/24", "10.0.1.0/24"]
+  publicIPAddressName       = "publicIp"
+  networkSecurityGroupName  = "NSG"
+  networkSecurityRule       = ["default-allow-rdp"]
+  storageAccountName        = lower(join("", ["diag", "${random_string.asaname-01.result}"]))
+  osDiskName                = join("",["${local.virtualMachineName}", "_OsDisk_1_", lower("${random_string.avmosd-01.result}")])
 }
 
 # Resource Group
 resource "azurerm_resource_group" "arg-01" {
-  name     = var.resourceGroupName
-  location = var.location
-}
-
-# Public IP
-resource "azurerm_public_ip" "apip-01" {
-  name                = local.publicIPAddressName
-  resource_group_name = azurerm_resource_group.arg-01.name
-  location            = azurerm_resource_group.arg-01.location
-  allocation_method   = local.publicIPAddressType
-}
-
-# Network Security Group 
-resource "azurerm_network_security_group" "ansg-01" {
-  name                = local.networkSecurityGroupName
-  resource_group_name = azurerm_resource_group.arg-01.name
-  location            = azurerm_resource_group.arg-01.location
-  security_rule {
-    name                       = "default-allow-22"
-    priority                   = 1000
-    access                     = "Allow"
-    direction                  = "Inbound"
-    destination_port_range     = "22"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+  name      = var.resource_group_name
+  location  = var.location
 }
 
 # Virtual Network
 resource "azurerm_virtual_network" "avn-01" {
   name                = local.virtualNetworkName
-  resource_group_name = azurerm_resource_group.arg-01.name
   location            = azurerm_resource_group.arg-01.location
-  address_space       = [local.addressPrefix]
+  resource_group_name = azurerm_resource_group.arg-01.name
+  address_space       = local.addressSpace
 }
 
-# Subnet
+# Subnet 1
 resource "azurerm_subnet" "as-01" {
-  name                 = local.subnetName
-  resource_group_name  = azurerm_resource_group.arg-01.name
-  virtual_network_name = azurerm_virtual_network.avn-01.name
-  address_prefixes     = [local.subnetPrefix]
+  name                  = local.subnets[0]
+  resource_group_name   = azurerm_resource_group.arg-01.name
+  virtual_network_name  = azurerm_virtual_network.avn-01.name
+  address_prefixes      = [local.subnetPrefix[0]]
+}
+
+# Subnet 2
+resource "azurerm_subnet" "as-02" {
+  name                  = local.subnets[1]
+  resource_group_name   = azurerm_resource_group.arg-01.name
+  virtual_network_name  = azurerm_virtual_network.avn-01.name
+  address_prefixes      = [local.subnetPrefix[1]]
+}
+
+# Public IP
+resource "azurerm_public_ip" "apip-01" {
+  name                = local.publicIPAddressName
+  location            = azurerm_resource_group.arg-01.location
+  resource_group_name = azurerm_resource_group.arg-01.name
+  allocation_method   = "Dynamic"
 }
 
 # Associate subnet and network security group 
-resource "azurerm_subnet_network_security_group_association" "asnsga-01" {
-  subnet_id                 = azurerm_subnet.as-01.id
-  network_security_group_id = azurerm_network_security_group.ansg-01.id
+resource "azurerm_network_security_group" "ansg-01" {
+  name                = local.networkSecurityGroupName
+  resource_group_name = azurerm_resource_group.arg-01.name
+  location            = azurerm_resource_group.arg-01.location
 }
 
-# Network interface with IP configuration
-resource "azurerm_network_interface" "anic-01" {
-  name                = local.nicName
+# Network security rule
+resource "azurerm_network_security_rule" "ansr-01" {
+  name                        = local.networkSecurityRule[0]
+  priority                    = 1000
+  source_address_prefix       = "*"
+  protocol                    = "Tcp"
+  destination_port_range      = "3389"
+  access                      = "Allow"
+  direction                   = "Inbound"
+  source_port_range           = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.arg-01.name
+  network_security_group_name = azurerm_network_security_group.ansg-01.name
+}
+
+# Network interface with Public IP
+resource "azurerm_network_interface" "ani-01" {
+  name                = local.nicName[0]
   resource_group_name = azurerm_resource_group.arg-01.name
   location            = azurerm_resource_group.arg-01.location
   ip_configuration {
-    name                          = "ipconfig1"
+    name                          = local.nicConfigName
+    subnet_id                     = azurerm_subnet.as-01.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.apip-01.id
-    subnet_id                     = azurerm_subnet.as-01.id
   }
 }
 
-# Create VM if authentication type is SSH
-resource "azurerm_linux_virtual_machine" "avm-ssh-01" {
-  name                  = var.vmName
-  resource_group_name   = azurerm_resource_group.arg-01.name
-  location              = azurerm_resource_group.arg-01.location
-  size                  = local.vmSize
-  network_interface_ids = [azurerm_network_interface.anic-01.id]
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+# Network interface 02
+resource "azurerm_network_interface" "ani-02" {
+  name                = local.nicName[1]
+  resource_group_name = azurerm_resource_group.arg-01.name
+  location            = azurerm_resource_group.arg-01.location
+  ip_configuration {
+    name                          = local.nicConfigName
+    subnet_id                     = azurerm_subnet.as-02.id
+    private_ip_address_allocation = "Dynamic"
   }
-  source_image_reference {
-    publisher = local.imagePublisher
-    offer     = local.imageOffer
-    sku       = local.imageSku
+}
+
+# Associate subnet and network security group 
+resource "azurerm_network_interface_security_group_association" "ansg-01" {
+  network_interface_id      = azurerm_network_interface.ani-01.id
+  network_security_group_id = azurerm_network_security_group.ansg-01.id
+}
+
+# Random string for storage account name  
+resource "random_string" "asaname-01" {
+  length  = 16
+  special = "false"
+}
+
+# Random string for OS disk
+resource "random_string" "avmosd-01" {
+  length  = 32
+  special = "false"
+}
+
+# Storage account
+resource "azurerm_storage_account" "asa-01" {
+  name                      = local.storageAccountName
+  resource_group_name       = azurerm_resource_group.arg-01.name
+  location                  = azurerm_resource_group.arg-01.location
+  account_replication_type  = "LRS"
+  account_tier              = var.storage_account_type
+}
+
+# Virtual Machine
+resource "azurerm_virtual_machine" "avm-01" {
+  name = local.virtualMachineName
+  resource_group_name               = azurerm_resource_group.arg-01.name
+  location                          = azurerm_resource_group.arg-01.location
+  vm_size                           = var.virtual_machine_size
+  network_interface_ids             = ["${azurerm_network_interface.ani-01.id}", "${azurerm_network_interface.ani-02.id}" ]
+  primary_network_interface_id      = azurerm_network_interface.ani-01.id
+  delete_os_disk_on_termination     = true
+  delete_data_disks_on_termination  = true
+  os_profile {
+    computer_name   = local.virtualMachineName
+    admin_username  = var.admin_username
+    admin_password  = var.admin_password
+  }
+  os_profile_windows_config {
+    provision_vm_agent = "true"
+  }
+  storage_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2016-Datacenter"
     version   = "latest"
   }
-  admin_username                  = var.adminUsername
-#  admin_password                  = var.authenticationType == "sshPublicKey" ? null : var.adminPasswordOrKey
-#  disable_password_authentication = var.authenticationType == "sshPublicKey" ? true : false
-#  dynamic "admin_ssh_key" {
-#    for_each = var.authenticationType == "sshPublicKey" ? [local.ssh_key] : []
-#    content {
-#      username   = admin_ssh_key.value["username"]
-#      public_key = admin_ssh_key.value["public_key"]
-#    }
-#  }
-#  tags = {
-#    Tag1 = "ManagedVM"
-#  }
-#}
-
-# Managed disk
-resource "azurerm_managed_disk" "amd-01" {
-  name                 = local.dataDisk1Name
-  resource_group_name  = azurerm_resource_group.arg-01.name
-  location             = azurerm_resource_group.arg-01.location
-  create_option        = "Empty"
-  storage_account_type = "Standard_LRS"
-  disk_size_gb         = 100
+  storage_os_disk {
+    name          = local.osDiskName    
+    create_option = "FromImage"
+  }
+  boot_diagnostics {
+    storage_uri = azurerm_storage_account.asa-01.primary_blob_endpoint
+    enabled     = "true"
+  }
 }
 
-resource "azurerm_managed_disk" "amd-02" {
-  name                 = local.dataDisk2Name
-  resource_group_name  = azurerm_resource_group.arg-01.name
-  location             = azurerm_resource_group.arg-01.location
-  create_option        = "Empty"
-  storage_account_type = "Standard_LRS"
-  disk_size_gb         = 100
-}
-
-# Attaching managed disk 1 to virtual machine
-resource "azurerm_virtual_machine_data_disk_attachment" "adattach-01" {
-  managed_disk_id    = azurerm_managed_disk.amd-01.id
-  virtual_machine_id = azurerm_linux_virtual_machine.avm-ssh-01.id
-  caching            = "ReadWrite"
-  lun                = 0
+## Output
+# Host FQDN
+output "hostname" {
+  value = azurerm_public_ip.apip-01.fqdn
 }
