@@ -14,11 +14,11 @@ locals {
   vmSize                   = "Standard_A2"
   virtualNetworkName       = join("", [var.vmName, "vnet"])
   networkSecurityGroupName = "default-NSG"
-  ssh_key = {
-    username   = var.adminUsername
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
 
+#  ssh_key = {
+#    username   = var.adminUsername
+#    public_key = file("~/.ssh/id_rsa.pub")
+#  }
 }
 
 # Generate random string for datadisk1
@@ -118,14 +118,14 @@ resource "azurerm_linux_virtual_machine" "avm-ssh-01" {
     version   = "latest"
   }
   admin_username                  = var.adminUsername
-  admin_password                  = var.authenticationType == "sshPublicKey" ? null : var.adminPasswordOrKey
-  disable_password_authentication = var.authenticationType == "sshPublicKey" ? true : false
-  dynamic "admin_ssh_key" {
-    for_each = var.authenticationType == "sshPublicKey" ? [local.ssh_key] : []
-    content {
-      username   = admin_ssh_key.value["username"]
-      public_key = admin_ssh_key.value["public_key"]
-    }
+#  admin_password                  = var.authenticationType == "sshPublicKey" ? null : var.adminPasswordOrKey
+#  disable_password_authentication = var.authenticationType == "sshPublicKey" ? true : false
+#  dynamic "admin_ssh_key" {
+#    for_each = var.authenticationType == "sshPublicKey" ? [local.ssh_key] : []
+#    content {
+#      username   = admin_ssh_key.value["username"]
+#      public_key = admin_ssh_key.value["public_key"]
+#    }
   }
   tags = {
     Tag1 = "ManagedVM"
