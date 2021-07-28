@@ -26,7 +26,7 @@ variable "tf_var_arm_tenant_id" {
 
 variable "resource_group_name" {
 	type = string
-	default = "terraform-rg"
+	default = "terraform-rg1"
 	description = "Enter the resource group name"
 }
 
