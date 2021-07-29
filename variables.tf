@@ -1,5 +1,5 @@
 # Authenticatio
-provider "registry.terraform.io/hashicorp/azurerm" {
+provider "azurerm" {
 	features {}
 	subscription_id = var.tf_var_arm_subscription_id
 	client_id  		= var.tf_var_arm_client_id
