@@ -42,11 +42,6 @@ variable "admin_username" {
 	description= "Default Admin username"
 }
 
-variable "admin_password" {
-	type = string
-	description = "Default Admin password"
-}
-
 variable "storage_account_type" {
 	type = string
 	default = "Standard"
