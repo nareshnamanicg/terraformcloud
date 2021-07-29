@@ -1,7 +1,6 @@
 # Authentication
 provider "azurerm" {
 	version = "=1.38.0"
-	features {}
 	subscription_id = var.tf_var_arm_subscription_id
 	client_id       = var.tf_var_arm_client_id
 	client_secret 	= var.tf_var_arm_client_secret
