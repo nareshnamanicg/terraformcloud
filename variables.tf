@@ -1,4 +1,4 @@
-# Authenticatio
+# Authentication
 provider "azurerm" {
 	features {}
 	subscription_id = var.tf_var_arm_subscription_id
