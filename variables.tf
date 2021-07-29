@@ -9,26 +9,26 @@ terraform {
 }
 provider "azurerm" {
 	features {}
-	subscription_id	= var.tf_var_arm_subscription_id
-	client_id       = var.tf_var_arm_client_id
-	client_secret 	= var.tf_var_arm_client_secret
-	tenant_id 	= var.tf_var_arm_tenant_id
+	subscription_id	= var.azurerm_subscription_id
+	client_id       = var.azurerm_client_id
+	client_secret 	= var.azurerm_client_secret
+	tenant_id 	= var.azurerm_tenant_id
 }
 
 # Variable declaration
-variable "tf_var_arm_subscription_id" {
+variable "azurerm_subscription_id" {
 	description = "enter subscription id"
 }
 
-variable "tf_var_arm_client_id" {
+variable "azurerm_client_id" {
 	description = "Enter Client ID"
 }
 
-variable "tf_var_arm_client_secret" {
+variable "azurerm_client_secret" {
 	description = "Enter secret"
 }
 
-variable "tf_var_arm_tenant_id" {
+variable "azurerm_tenant_id" {
 	description = "Enter tenant ID"
 }
 
