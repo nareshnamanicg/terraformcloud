@@ -1,10 +1,10 @@
 # Authentication
 provider "azurerm" {
-	version = "=1.38.0"
-	subscription_id = var.tf_var_arm_subscription_id
-	client_id       = var.tf_var_arm_client_id
+	features {}
+	subscription_id	= var.tf_var_arm_subscription_id
+	client_id  			= var.tf_var_arm_client_id
 	client_secret 	= var.tf_var_arm_client_secret
-	tenant_id       = var.tf_var_arm_tenant_id
+	tenant_id 			= var.tf_var_arm_tenant_id
 }
 
 # Variable declaration
@@ -13,48 +13,61 @@ variable "tf_var_arm_subscription_id" {
 }
 
 variable "tf_var_arm_client_id" {
-  description = "Enter Client ID"
+	description = "Enter Client ID"
 }
 
 variable "tf_var_arm_client_secret" {
-  description = "Enter secret"
+	description = "Enter secret"
 }
 
 variable "tf_var_arm_tenant_id" {
-  description = "Enter tenant ID"
+	description = "Enter tenant ID"
 }
 
-variable "resource_group_name" {
-	type = string
-	default = "terraform-rg1"
-	description = "Enter the resource group name"
-}
-
-variable "virtual_machine_size" {
-	type = string
-	default = "Standard_DS1_v2"
-	description = "Virtual machine size (has to be at least the size of Standard_A3 to support 2 NICs)"
-}
-
-variable "admin_username" {
-	type = string
-	default = "demo_user"
-	description= "Default Admin username"
-}
-
-variable "admin_password" {
-	type = string
-	description = "Default Admin password"
-}
-
-variable "storage_account_type" {
-	type = string
-	default = "Standard"
-	description = "Storage Account type for the VM and VM diagnostic storage"
+variable "resourceGroupName" {
+	type        = string
+	default     = "demo-rg"
+	description = "Resource Group for this deployment."
 }
 
 variable "location" {
-	type = string
-	default = "westus"
-	description = "Enter the location for all resources."
+	type        = string
+	default     = "WestUS"
+	description = "Location for all resources"
+}
+
+variable "vnetName" {
+	type        = string
+	default     = "VNet1"
+	description = "VNet name."
+}
+
+variable "vnetAddressPrefix" {
+	type        = string
+	default 		= "10.0.0.0/16"
+	description = "Address prefix."
+}
+
+variable "subnet1Prefix" {
+	type        = string
+	default     = "10.0.0.0/24"
+	description = "Subnet 1 Prefix."
+}
+
+variable "subnet1Name" {
+	type        = string
+	default     = "Subnet1"
+	description = "Subnet 1 Name."
+}
+
+variable "subnet2Prefix" {
+	type    		= string
+	default 		= "10.0.1.0/24"
+	description = "Subnet 2 Prefix."
+}
+
+variable "subnet2Name" {
+	type    		= string
+	default 		= "Subnet2"
+	description = "Subnet 2 Name."
 }
