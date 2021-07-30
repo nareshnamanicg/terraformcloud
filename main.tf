@@ -13,7 +13,7 @@ resource "azurerm_virtual_network" "avn-01" {
 }
 
 # Subnet 1
-resource "azurerm_subnet" "ass-01" {
+resource "azurerm_subnet" "as-01" {
 	name                  = var.subnet1Name
 	resource_group_name   = azurerm_resource_group.arg-01.name
 	virtual_network_name  = azurerm_virtual_network.avn-01.name
